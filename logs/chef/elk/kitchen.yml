@@ -1,0 +1,44 @@
+---
+driver:
+  name: vagrant
+  vm_hostname: elk.local
+  private_network: 
+    ip: "192.168.192.10"
+  provider: libvirt
+  customize:
+    memory: 1024
+    cpus: 1
+
+provisioner:
+  name: chef_solo
+  always_update_cookbooks: true
+
+platforms:
+  - name: centos/7
+    # TO DO: ACCEPT LICENSE
+    # manual fix: 
+    #   1) kitchen login
+    #   2) run chef-solo and accept licence
+    #
+    # lifecycle:
+    #   pre_converge:
+    #   - remote: sudo echo "chef_license = 'accept'" >> /etc/chef/client.rb || sudo mkdir /etc/chef && sudo echo "chef_license = 'accept'" >> /etc/chef/client.rb || ls -la /etc/chef
+suites:
+  - name: ELK
+    run_list: 
+      - recipe[elk::default]
+      - recipe[elk::nginx]
+      - recipe[elk::elasticsearch]
+      - recipe[elk::kibana]
+      - recipe[elk::logstash]
+    verifier:
+      name: inspec
+      inspec_tests:
+        - test/integration/default/default_test.rb
+        - test/integration/nginx/inspec_test.rb
+        - test/integration/elasticsearch/inspec_test.rb
+        - test/integration/kibana/inspec_test.rb
+        - test/integration/logstash/inspec_test.rb
+    attributes: 
+      nginx:
+        server_name: 'elk.local'

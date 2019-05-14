@@ -1,0 +1,11 @@
+output {
+  elasticsearch {
+    <% @addresses.each do |a, params| %>
+    <% if (a.include?('192.168')) -%>
+    hosts => ["<%= a %>:9200"]
+    <% end -%>
+    <% end %>
+    manage_template => false
+    index => "%{[@metadata][beat]}-%{[@metadata][version]}-%{+YYYY.MM.dd}"
+  }
+}
