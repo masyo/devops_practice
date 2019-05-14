@@ -1,0 +1,110 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vm.box_check_update = false
+  # Provider: libvirt
+  config.vm.define "lb" do |lb|
+    config.vm.provider "libvirt" do |l|
+      l.cpus = 2
+      l.memory = 512
+    end
+    lb.vm.box = "centos/7"
+    lb.vm.network "private_network", ip: "192.168.33.10"
+    lb.vm.provision "shell", inline: <<-SHELL
+    sed 's/PasswordAuthentication no/PasswordAuthentication yes/g' -i /etc/ssh/sshd_config;
+    service sshd restart;
+    echo -e '****\nPlease wait, configuring the lb ...\n\n';
+    yum install epel-release -y;
+    yum install nginx net-tools telnet -y;
+    echo -e '***\tDone!\t****\n\n';
+  SHELL
+  end
+  
+  config.vm.define :node1 do |node1|
+    node1.vm.box = 'centos/7'
+    node1.vm.network "private_network", ip: "192.168.192.2", libvirt__domain_name: "node1.local"
+    node1.vm.provider "libvirt" do |l|
+      l.memory = 512
+      l.cpus = 1
+    end
+    node1.vm.provision 'shell', run: 'always' do |s|
+      s.inline = "
+        echo -e '****\nPlease wait, configuring the node ...\n\n'
+        rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch;
+        echo '[elasticsearch-6.x]
+        name=Elasticsearch repository for 6.x packages
+        baseurl=https://artifacts.elastic.co/packages/6.x/yum
+        gpgcheck=1
+        gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled=1
+        autorefresh=1
+        type=rpm-md' > /etc/yum.repos.d/elasticsearch.repo;
+        sed -i 's/ //g' /etc/yum.repos.d/elasticsearch.repo;
+        yum install filebeat httpd net-tools telnet -y;
+        systemctl enable httpd;
+        systemctl start httpd;
+        echo -e '***\tDone!\t****\n\n';
+      "
+    end
+  end
+
+  config.vm.define :elk do |elk|
+    elk.vm.box = 'centos/7'
+    elk.vm.network "private_network", ip: "192.168.192.10", libvirt__domain_name: "elk.local"
+    elk.vm.provider "libvirt" do |l|
+      
+      l.memory = 1024
+      l.cpus = 1
+    end
+    elk.vm.provision 'shell', run: 'always' do |s|
+      s.inline = "
+        echo -e '****\nPlease wait, configuring the node ...\n\n'
+        hostname elk.local;
+        rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch;
+        echo '[elasticsearch-6.x]
+        name=Elasticsearch repository for 6.x packages
+        baseurl=https://artifacts.elastic.co/packages/6.x/yum
+        gpgcheck=1
+        gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled=1
+        autorefresh=1
+        type=rpm-md' > /etc/yum.repos.d/elasticsearch.repo;
+        sed -i 's/ //g' /etc/yum.repos.d/elasticsearch.repo;
+        yum install epel-release -y;
+        yum install nginx elasticsearch kibana logstash net-tools telnet java-1.8.0-openjdk java-1.8.0-openjdk-devel -y;
+        sed -i 's/#network.host: 192.168.0.1/network.host: 192.168.192.10/g' /etc/elasticsearch/elasticsearch.yml;
+        systemctl enable elasticsearch;
+        systemctl start elasticsearch;
+        echo -e '\n\nTESTING ELASTICSEARCH: START\n\n';
+        curl -X GET 'http://192.168.192.10:9200';
+        echo -e '\n\nTESTING ELASTICSEARCH: FINISH\n\n';
+        systemctl enable logstash;
+        # systemctl start logstash;
+        systemctl enable kibana;
+        systemctl start kibana;
+        systemctl enable nginx;
+        echo -e '***\tDone!\t****\n\n';
+      "
+    end
+  end
+  # config.vm.define :node2 do |node2|
+  #   node2.vm.box = 'centos/7'
+  #   node2.vm.provider "libvirt" do |l|
+  #     :libvirt__domain_name => "node2k.local"
+  #     l.memory = 512
+  #     l.cpus = 1
+  #   end
+  #   node2.vm.provision 'shell', run: 'always' do |s|
+  #     s.inline = "
+  #       echo -e '****\nPlease wait, configuring the node ...\n\n'
+  #       yum install httpd net-tools telnet -y;
+  #       systemctl enable httpd;
+  #       systemctl start httpd;
+  #       echo -e '***\tDone!\t****\n\n';
+  #     "
+  #   end
+  # end
+end
+
