@@ -1,0 +1,29 @@
+<!doctype html>
+<title>{% block title %}{% endblock %}Birthday Records</title>
+
+<h1>Birthday Records</h1>
+
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Lastname</th>
+        <th>Birthday</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in records %}
+      <tr>
+        <td>{{ record['firstname'] }}</td>
+        <td>{{ record['lastname'] }}</td>
+        <td>{{ record['birthdate'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% block content %}{% endblock %}
+</section>

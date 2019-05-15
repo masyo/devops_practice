@@ -1,0 +1,9 @@
+[Mon Apr 08 11:06:49.583903 2019] [core:notice] [pid 5100] SELinux policy enabled; httpd running as context system_u:system_r:httpd_t:s0
+[Mon Apr 08 11:06:49.584912 2019] [suexec:notice] [pid 5100] AH01232: suEXEC mechanism enabled (wrapper: /usr/sbin/suexec)
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using localhost.localdomain. Set the 'ServerName' directive globally to suppress this message
+[Mon Apr 08 11:06:49.595272 2019] [auth_digest:notice] [pid 5100] AH01757: generating secret for digest authentication ...
+[Mon Apr 08 11:06:49.596361 2019] [lbmethod_heartbeat:notice] [pid 5100] AH02282: No slotmem from mod_heartmonitor
+[Mon Apr 08 11:06:49.598356 2019] [mpm_prefork:notice] [pid 5100] AH00163: Apache/2.4.6 (CentOS) configured -- resuming normal operations
+[Mon Apr 08 11:06:49.598372 2019] [core:notice] [pid 5100] AH00094: Command line: '/usr/sbin/httpd -D FOREGROUND'
+[Mon Apr 08 12:11:15.878370 2019] [autoindex:error] [pid 5104] [client ::1:49204] AH01276: Cannot serve directory /var/www/html/: No matching DirectoryIndex (index.html) found, and server-generated directory index forbidden by Options directive
+[Mon Apr 08 12:23:07.835919 2019] [autoindex:error] [pid 5105] [client ::1:49206] AH01276: Cannot serve directory /var/www/html/: No matching DirectoryIndex (index.html) found, and server-generated directory index forbidden by Options directive
